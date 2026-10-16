@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: todo-manager-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: change_me
+      MYSQL_DATABASE: todo_manager
+    ports:
+      - "3306:3306"
+    volumes:
+      - todo_mysql_data:/var/lib/mysql
+  backend:
+    build: ./backend
+    container_name: todo-manager-backend
+    depends_on:
+      - mysql
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/todo_manager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: change_me
+      PORT: 8080
+    ports:
+      - "8080:8080"
+  frontend:
+    build: ./frontend
+    container_name: todo-manager-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+volumes:
+  todo_mysql_data:
